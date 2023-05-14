@@ -1,1 +1,1 @@
-# LaugChat
+# LaugerAPI
