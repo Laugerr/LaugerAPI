@@ -33,7 +33,6 @@ return new class extends Migration
             $table->string('ip_current')->nullable();
             $table->string('machine_id')->nullable();
             $table->timestamps();
-            $table->dateTimeTz('created_at', $precision = 0);
         });
     }
 
