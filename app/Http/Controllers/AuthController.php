@@ -27,11 +27,57 @@ class AuthController extends Controller
             'password' => Hash::make($validate['password'])
         ]);
 
+        $token = $user->createToken('mylaugertoken')->plainTextToken;
+
         $response = [
-            'user' => $user
+            'user' => $user,
+            'token' => $token
         ];
 
         return response($response, 201);
     }
     
+    public function login(Request $request){
+        $credentials = $request->validate([
+            'login' => 'required|string',
+            'password' => 'required|string'
+        ]);
+
+        // Checking either login using email or username
+        $field = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $credentials[$field] = $credentials['login'];
+        unset($credentials['login']);
+
+        if (Auth::attempt($credentials)){
+            $user = Auth::user();
+            $request->session()->regenerate();
+            // Token creation
+            $token = $user->createToken('mylaugertoken')->plainTextToken;
+
+            $response = [
+                'message' => 'Login Successful!',
+                'user' => $user,
+                'token' => $token
+            ];
+
+            // Authentication Success
+            return response($response, 201);
+        } else {
+            return response(['message' => 'Invalide Credentials.'], 401);
+        }
+    }
+
+    public function logout(Request $request){
+        $user = Auth::user();
+
+        if($user){
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return response(['message' => 'Logged out!'], 200);
+        }else{
+            return response(['message' => 'No account is logged in. Login first!'], 401);
+        }
+    }
 }
