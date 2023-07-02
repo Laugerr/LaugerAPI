@@ -19,12 +19,15 @@ class AuthController extends Controller
             'password' => 'required|string|confirmed|min:6',
         ]);
 
+        $ip = $request->ip(); // Get the IP address of the user registring
+        
         $user = User::create([
             'username' => $validate['username'],
             'first_name' => $validate['first_name'],
             'family_name' => $validate['family_name'],
             'email' => $validate['email'],
-            'password' => Hash::make($validate['password'])
+            'password' => Hash::make($validate['password']),
+            'ip_register' => $ip // Set the IP address of the user registring 
         ]);
 
         $token = $user->createToken('mylaugertoken')->plainTextToken;
@@ -48,8 +51,19 @@ class AuthController extends Controller
         $credentials[$field] = $credentials['login'];
         unset($credentials['login']);
 
+        //Get user current IP address
+        $ip = $request->ip();
+        //Get user current Machine ID
+        $machineID = request()->header('User-Agent');
+
         if (Auth::attempt($credentials)){
             $user = Auth::user();
+            //Update the current IP address and Machine ID for the logged-in user
+            $user->update([
+                'ip_current' => $ip,
+                'machine_id' => $machineID
+            ]);
+            
             $request->session()->regenerate();
             // Token creation
             $token = $user->createToken('mylaugertoken')->plainTextToken;

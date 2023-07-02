@@ -26,6 +26,9 @@ class User extends Authenticatable
         'gender',
         'profile_image',
         'bio',
+        'ip_register',
+        'ip_current',
+        'machine_id',
     ];
 
     /**
